@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 # https://github.com/OpenNeuroDatasets/ds003825
+# (24648, 63, 276) = (epochs, channels, samples)
 
 def preprocessing_things(partid):
     # Specify the data path and create a directory for derivatives if it doesn't exist

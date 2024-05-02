@@ -33,17 +33,46 @@ This repository contains code for preprocessing EEG data from the OpenNeuro data
 * The preprocessed EEG data is saved to a file in the `data/derivatives/mne/` directory, with the filename format `sub-<partid>_task-rsvp-epo.fif`.
 * The script also generates plots of the preprocessed EEG data, including a sample of the raw data, the average of the epochs data, and the power spectral density of the epochs data.
 
+**Neural Network Architecture**
+
+
+![EEG Conformer Architecture](plots/EEG_Conformer_Architecture.png)
+
 **Architecture Details:**
 
-* `Input Layer`: Batch of EEG trials.
-* `Temporal Convolution`: **Kernel size**: (1, 25), **Activation**: ELU.
-* `Spatial Convolution:` **Kernel size**: (ch, 1), **Activation**: ELU.
-* `Batch Normalization:` Standardizes input features by re-centering and scaling.
-* `Average Pooling:` Reduces dimensionality and computational load.
-* `Token Formation:` Prepares data for attention mechanism.
-* `Multi-Head Attention:` Enhances model's ability to focus on different parts of input data.
-* `Fully Connected Layers:` Maps the learned features to the output space.
-* `Output Layer:` Produces final classification.
+**Architecture Details:**
+
+- **Input Layer**: Handles preprocessed EEG trials, feeding them into the network.
+
+- **Temporal Convolution**: 
+  - **Kernel Size**: (1, 25)
+  - **Activation**: ELU
+  - **Purpose**: Captures temporal patterns within EEG signals.
+
+- **Spatial Convolution**: 
+  - **Kernel Size**: (ch, 1)
+  - **Activation**: ELU
+  - **Purpose**: Extracts spatial relationships across EEG channels.
+
+- **Batch Normalization**: Facilitates faster and more stable training by normalizing layer outputs.
+
+- **Average Pooling**: 
+  - **Kernel Size**: (1, 75), **Stride**: (1, 15)
+  - **Purpose**: Reduces data dimensions and computational burden, maintaining essential features.
+
+- **Token Formation**: Organizes pooled features into tokens, preparing them for attention processing.
+
+- **Multi-Head Attention**:
+  - **Activation**: Softmax
+  - **Components**: Transforms tokens into Query (Q), Key (K), and Value (V) matrices, calculates attention scores through scaled dot products, and applies these scores to the values for dynamic feature focus.
+
+- **Fully Connected Layers**: 
+  - **Activation**: Softmax
+  - **Purpose**: Maps attention-augmented features to the output categories.
+
+- **Output Layer**: Outputs final predictions in an M-dimensional vector format, corresponding to the classified EEG categories.
+
+
 
 **License**
 

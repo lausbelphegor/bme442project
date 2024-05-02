@@ -35,9 +35,9 @@ This repository contains code for preprocessing EEG data from the OpenNeuro data
 
 **Architecture Details:**
 
-* `Input Layer:` Batch of EEG trials.
-* `Temporal Convolution: Kernel size:` (1, 25), Activation: ELU.
-* `Spatial Convolution: Kernel size:` (ch, 1), Activation: ELU.
+* `Input Layer`: Batch of EEG trials.
+* `Temporal Convolution`: **Kernel size**: (1, 25), **Activation**: ELU.
+* `Spatial Convolution:` **Kernel size**: (ch, 1), **Activation**: ELU.
 * `Batch Normalization:` Standardizes input features by re-centering and scaling.
 * `Average Pooling:` Reduces dimensionality and computational load.
 * `Token Formation:` Prepares data for attention mechanism.

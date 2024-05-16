@@ -1,2 +1,5 @@
-.venv
 data
+old
+venv-3.10.5
+.gitignore
+__pycache__

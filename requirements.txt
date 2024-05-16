@@ -1,5 +1,7 @@
-mne
-logging
+mne==1.2.1
 numpy
-pandas
-graphviz
+tensorflow==2.13.0
+scikit-learn==1.2.2
+matplotlib
+PyRiemann
+logging

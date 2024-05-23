@@ -1,22 +1,26 @@
 import numpy as np
 import pickle
 import mne
-from EEGModels import EEGNet
+from models.EEGModels import EEGNet
+
+import torch
+from braindecode.models import EEGNetv4, EEGConformer, ATCNet, EEGITNet, EEGInception
+from skorch import NeuralNetClassifier
+from models import cuda
+from skorch.callbacks import LRScheduler, TrainEndCheckpoint
+
 from tensorflow.keras import utils as np_utils
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
-from pyriemann.estimation import XdawnCovariances
-from pyriemann.tangentspace import TangentSpace
+
+
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
 import matplotlib.pyplot as plt
 import os
 import visualkeras
-import tensorflow as tf
-
-# Check if GPU is available
-print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 # Set image data format
 K.set_image_data_format('channels_last')
@@ -33,28 +37,36 @@ base_dir = './preprocessed_data/'
 X_combined = []
 y_combined = []
 
+# with open('C:\\temp\\BME_442\\bme442project\\preprocessed_data\S001\\task_1\\run_3.pkl', 'rb') as f:
+#     data = pickle.load(f)
+#     print(data['y'])
+
 # Load data from each subject
 for subject in os.listdir(base_dir):
     subject_dir = os.path.join(base_dir, subject)
     if os.path.isdir(subject_dir):
-        for task in ['baseline_closed', 'baseline_open', 'task_1', 'task_2', 'task_3', 'task_4']:
+        for task in ['task_1', 'task_2', 'task_3', 'task_4']:
             task_dir = os.path.join(subject_dir, task)
             if os.path.isdir(task_dir):
                 for run_file in os.listdir(task_dir):
                     if run_file.endswith('.pkl'):
                         run_path = os.path.join(task_dir, run_file)
+                        print(run_path)
                         with open(run_path, 'rb') as f:
-                            X, y = pickle.load(f)
-                            X_combined.append(X)
-                            y_combined.append(y)
+                            data = pickle.load(f)
+                            X_combined.append(data['X'])
+                            y_combined.append(data['y'])
+                            # print(X_combined)
 
 # Convert lists to arrays
 X_combined = np.concatenate(X_combined, axis=0)
 y_combined = np.concatenate(y_combined, axis=0)
-
+P
 # Check the shapes of the combined datasets
 print("X_combined shape:", X_combined.shape)
 print("y_combined shape:", y_combined.shape)
+
+unique, counts = np.unique(y_combined, return_counts=True)
 
 # Ensure that the number of samples is correct for y
 if X_combined.shape[0] != y_combined.shape[0]:
@@ -128,16 +140,6 @@ preds = probs.argmax(axis=-1)
 acc = np.mean(preds == Y_test.argmax(axis=-1))
 print("Classification accuracy: %f " % (acc))
 
-# PyRiemann part (for comparison)
-n_components = 2
-clf = make_pipeline(XdawnCovariances(n_components), TangentSpace(metric='riemann'), LogisticRegression())
-X_train_reshaped = X_train.reshape(X_train.shape[0], chans, samples)
-X_test_reshaped = X_test.reshape(X_test.shape[0], chans, samples)
-clf.fit(X_train_reshaped, Y_train.argmax(axis=-1))
-preds_rg = clf.predict(X_test_reshaped)
-acc2 = np.mean(preds_rg == Y_test.argmax(axis=-1))
-print("Classification accuracy: %f " % (acc2))
-
 # Plot confusion matrices
 names = ['rest', 'left fist', 'right fist', 'both fists', 'both feet']
 
@@ -145,10 +147,4 @@ cm_eegnet = confusion_matrix(Y_test.argmax(axis=-1), preds)
 disp_eegnet = ConfusionMatrixDisplay(confusion_matrix=cm_eegnet, display_labels=names)
 disp_eegnet.plot(cmap=plt.cm.Blues)
 plt.title('EEGNet-8,2')
-plt.show()
-
-cm_rg = confusion_matrix(Y_test.argmax(axis=-1), preds_rg)
-disp_rg = ConfusionMatrixDisplay(confusion_matrix=cm_rg, display_labels=names)
-disp_rg.plot(cmap=plt.cm.Blues)
-plt.title('xDAWN + RG')
 plt.show()

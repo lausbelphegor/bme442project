@@ -11,7 +11,6 @@ The EEG Motor Movement/Imagery Dataset (EEGMMIDB) from PhysioNet contains EEG re
 - **Loading Data**: The EEG data for each subject is stored in EDF files, with each file representing a run of a specific task or baseline condition.
 - **Filtering**: Each raw EEG recording is subjected to a powerline notch filter at 60 Hz to remove electrical noise, followed by a high-pass filter at 2 Hz to remove slow drifts.
 - **Epoching**: The data is segmented into epochs. For baseline conditions, fixed-length epochs of 60 seconds are created. For task conditions, epochs of 4.1 seconds are created based on the event annotations in the data.
-- **Normalization**: The EEG signals are converted from volts to microvolts for consistency.
 - **Event Mapping**: Events are mapped to specific task labels, with each epoch assigned a label according to the task being performed during that epoch.
 
 #### Example Preprocessing Code

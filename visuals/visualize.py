@@ -4,7 +4,7 @@ import os
 
 
 # Load the EDF file
-file_path = 'data\S001\S001R04.edf'
+file_path = 'data\S001\S001R06.edf'
 
 # print(process_subject(subjects[0]))
 

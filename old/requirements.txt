@@ -1,0 +1,10 @@
+mne
+logging
+numpy
+pandas
+graphviz
+ipykernel
+sagemaker
+torchvision
+einops
+torch

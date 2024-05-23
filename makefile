@@ -4,19 +4,19 @@ no-op:
 	@echo "No operation"
 
 install:
-	pip install -r requirements.txt
+	pip install -r .requirements.txt
 
 uninstall: freeze
-	pip uninstall -y -r freeze.txt
+	pip uninstall -y -r .freeze.txt
 
 freeze:
-	pip freeze > freeze.txt
+	pip freeze > .freeze.txt
 
 update-requirements:
-	pip freeze > requirements.txt
+	pip freeze > .requirements.txt
 
 activate:
-	@echo Run './venv-3.10.5/Scripts/Activate.ps1' in your shell to activate the virtual environment."
+	@echo Run './.venv/Scripts/Activate.ps1' in your shell to activate the virtual environment."
 
 deactivate:
 	@echo "Run 'deactivate' in your shell to deactivate the virtual environment."

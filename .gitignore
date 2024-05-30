@@ -1,5 +1,7 @@
 data
 background
 preprocessed_data
+old
 .gitignore
+.venv
 __pycache__

@@ -1,29 +1,39 @@
-[Colab](https://colab.research.google.com/drive/1DasOYyrXmeAUCnT8sByn696Fb839nQ9q?usp=sharing)
+# **EEG Signal Classification for Motor and Imagined Movements Using EEGNet Architecture**
+
+| [Colab](https://colab.research.google.com/drive/1DasOYyrXmeAUCnT8sByn696Fb839nQ9q?usp=sharing) | | | | | | | | | | | | | | | Recep Oğuz Keser |
+| :--------------------------------------------------------------------------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ----------------: |
+
+# **Abstract**
+
+Accurate classification of EEG signals for motor and imagined movements is essential for the development of brain-computer interfaces (BCIs) that benefit impaired individuals and enhance functionalities for healthy users. This study explores various classification methods to improve the accuracy and interpretability of EEG signals. Utilizing a dataset of over 1500 EEG recordings from 109 volunteers, subjects performed a series of motor and imagery tasks while their EEGs were recorded using a 64-channel setup and sampled at 160 Hz[<sup>[7]</sup>](#7). The data underwent preprocessing, including filtering and epoch segmentation, to prepare it for analysis. The core of our model is the EEGNet architecture, designed to capture spatial and temporal features through convolutional layers, depthwise separable convolutions, and robust regularization techniques[<sup>[8]</sup>](#8)[<sup>[9]</sup>](#9). The model is trained using StratifiedKFold cross-validation, with performance metrics such as accuracy, sensitivity, specificity, PPV, and NPV being evaluated.
+
+Our results indicate a varying performance across different folds, with significant challenges in accurately classifying the "Both fists" and "Rest" classes. The model achieves high overall accuracy but demonstrates a need for further refinement to consistently distinguish between similar classes. This study highlights the potential of the EEGNet architecture in EEG signal classification while also identifying areas for improvement, such as enhancing the model's ability to differentiate between motor and imagined tasks. Future work could involve separating and independently analyzing motor and imagined tasks to provide deeper insights into their classification challenges and comparing the classification performance across motor, imagined, and combined tasks.
 
 # **INTRODUCTION**
 
-The accurate identification of EEG signals is both challenging and time-consuming. However, utilizing EEG signals to identify motor or imagined movements can provide significant advantages for impaired individuals and offer new possibilities for healthy individuals. 
+The accurate identification of EEG signals, especially for motor and imagined movements, is essential for advancing brain-computer interfaces (BCIs) that can aid impaired individuals and offer new functionalities for healthy users. Several studies have explored different methods to classify EEG signals with a focus on improving accuracy and interpretability.
 
-Our aim is to apply and optimize the EEGNet v4 model for classifying EEG signals related to motor and imagined movements. 
+Velasco et al. (2023) proposed a multivariate time series approach to enhance the classification accuracy of motor imagery EEG signals, achieving high accuracy with reduced variables, which is essential for avoiding overfitting and improving interpretability[<sup>[1]</sup>](#1). Batistic et al. (2023) explored different classifiers for motor imagery, highlighting the superior performance of a ResNet-based CNN, especially with vibrotactile guidance, suggesting improvements in preprocessing and classifier selection for better accuracy[<sup>[2]</sup>](#2). Alizadeh et al. (2023) utilized a deep CNN to classify motor imagery tasks, showing that 2D wavelet-transformed images and CNN architectures like AlexNet and LeNet provide high classification accuracy, emphasizing the potential of image-based EEG classification approaches[<sup>[3]</sup>](#3). Duan (2023) demonstrated that real and imagined knee movements can be classified with high accuracy using a modified LeNet-5 CNN, suggesting that combining motor imagery and movement execution data could enhance BCI applications[<sup>[4]</sup>](#4). Pham et al. (2023) compared tEEG and conventional EEG, finding that tEEG provides better spatial resolution and signal-to-noise ratio, and when used with CNNs, offers high classification accuracy for finger movements[<sup>[5]</sup>](#5).
+
+# **METHOD**
 
 ## **Dataset**
 
-The dataset used in this project comprises over 1500 EEG recordings from 109 volunteers, collected using the BCI2000 system. The experimental protocol involved subjects performing various motor and imagery tasks while 64-channel EEGs were recorded. Each subject completed 14 runs:
+The dataset used in this project comprises over 1500 EEG recordings from 109 volunteers, collected using the BCI2000 system[<sup>[7]</sup>](#7). The experimental protocol involved subjects performing various motor and imagery tasks while 64-channel EEGs were recorded. Each subject completed 14 runs:
 
 - Two one-minute baseline runs (eyes open and eyes closed).
 
 - Three two-minute runs of four different tasks:
-    - **Task 1**: Open and close left or right fist.
-    - **Task 2**: Imagine opening and closing left or right fist.
-    - **Task 3**: Open and close both fists or both feet.
-    - **Task 4**: Imagine opening and closing both fists or both feet.
+  - **Task 1**: Open and close left or right fist.
+  - **Task 2**: Imagine opening and closing left or right fist.
+  - **Task 3**: Open and close both fists or both feet.
+  - **Task 4**: Imagine opening and closing both fists or both feet.
 
-The EEG signals were sampled at 160 Hz. Annotations indicate **rest (T0)**, cue for motion or imagined motion (**T1 for left fist or both fists**, **T2 for right fist or both feet**).
+The EEG signals were sampled at 160 Hz. Annotations indicate **rest (T0)**, cue for motion or imagined motion (**T1 for left fist or both fists**, **T2 for right fist or both feet**)[<sup>[6]</sup>](#6).
 
-The data is in EDF+ format, with annotations. The EEGs were recorded from 64 electrodes following the international 10-10 system, excluding specific electrodes.
+The data is in EDF+ format, with annotations. The EEGs were recorded from 64 electrodes following the international 10-10 system, excluding specific electrodes.[<sup>[7]</sup>](#7)
 
-For more details please refer to **[EEGMMIDB](https://www.physionet.org/content/eegmmidb/1.0.0/)**
-## **Data Processing**
+## **Data Preprocessing**
 
 The data processing involves reading EEG data from EDF files, filtering, and segmenting it into epochs. The key steps include:
 
@@ -33,9 +43,9 @@ The data processing involves reading EEG data from EDF files, filtering, and seg
 
 - **Epoch Creation**:
 
-    - For baseline data (baseline_open, baseline_closed), fixed-length epochs of 60 seconds are created.
+  - For baseline data (baseline_open, baseline_closed), fixed-length epochs of 60 seconds are created.
 
-    - For task data (task_1 to task_4), epochs are created based on annotations within the EDF file. These epochs are 4.1 seconds long, matching the duration of the tasks.
+  - For task data (task_1 to task_4), epochs are created based on annotations within the EDF file. These epochs are 4.1 seconds long, matching the duration of the tasks.
 
 - **Labeling**: Labels are assigned to each epoch based on the task type and event annotations.
 
@@ -45,49 +55,134 @@ The data processing involves reading EEG data from EDF files, filtering, and seg
 
 ## **Model**
 
-![](visuals/eegnet_arch_det.png)
+The neural network architecture illustrated in Figure 1 is EEGNet, designed specifically for processing EEG (Electroencephalography) signals. EEGNet is widely used in brain-computer interface applications due to its efficiency and effectiveness in handling EEG data.[<sup>[9]</sup>](#9) The architecture comprises three main blocks: initial convolutional layers, depthwise separable convolutional layers, and a final classification layer.
+[<sup>[8]</sup>](#8)
+
+| ![Figure 1](visuals/eegnet_arch_det.png) |
+| :--------------------------------------: |
+|          _Figure 1_ - _EEGNet_           |
+
+### **Block 1**: Initial Convolutional and Depthwise Convolutional Layers
+
+The first block aims to capture essential spatial and temporal features from the EEG data.
+
+1. **Conv2D Layer**:
+   - The initial layer applies a two-dimensional convolution to the input EEG data, utilizing 1 input channel and $\frac{f_s}{2}$ output channels, where $f_s$ denotes the sampling frequency of the EEG signals.
+2. **Batch Normalization**:
+
+   - Following the Conv2D layer, batch normalization is applied to stabilize and accelerate the training process by normalizing the activations.
+
+3. **DepthwiseConv2D Layer**:
+   - This layer performs depthwise convolution with $C$ filters, where $C$ corresponds to the number of EEG channels. This operation processes each channel independently, preserving spatial information.
+4. **Batch Normalization**:
+
+   - Another batch normalization layer is used to normalize the activations post-depthwise convolution.
+
+5. **Activation Function**:
+
+   - An activation function, such as ReLU, is applied to introduce non-linearity, enabling the network to learn more complex patterns.
+
+6. **Average Pooling (AveragePool2D)**:
+
+   - Average pooling with a filter size of $1 \times 4$ reduces the spatial dimensions by averaging over non-overlapping 4x4 blocks.
+
+7. **Dropout**:
+   - Dropout regularization is implemented to prevent overfitting by randomly setting a fraction of the input units to zero during training.
+
+### **Block 2**: Depthwise Separable Convolutional Layers
+
+The second block is designed to further process the features extracted by the initial block in a parameter-efficient manner.
+
+1. **SeparableConv2D Layer**:
+
+   - This layer employs depthwise separable convolutions with 16 filters, decomposing the convolution operation into a depthwise spatial convolution followed by a pointwise convolution, significantly reducing the computational complexity.
+
+2. **Batch Normalization**:
+
+   - Batch normalization is again utilized to normalize the activations from the SeparableConv2D layer.
+
+3. **Activation Function**:
+
+   - An activation function is applied to introduce additional non-linearity.
+
+4. **Average Pooling (AveragePool2D)**:
+
+   - Average pooling with a filter size of $1 \times 8$ is used to further downsample the spatial dimensions.
+
+5. **Dropout**:
+
+   - Dropout regularization is included to mitigate overfitting.
+
+6. **Flatten Layer**:
+   - This layer flattens the multi-dimensional feature maps into a one-dimensional vector, making it suitable for subsequent fully connected layers.
+
+### **Classifier**
+
+The final component of the architecture is the classifier, which consists of:
+
+1. **Dense Layer**:
+
+   - A fully connected dense layer that consolidates the features from the previous layers to make a prediction.
+
+2. **Activation Function**:
+   - The final activation function, typically softmax, is applied to convert the network outputs into class probabilities.
+
+This architecture effectively balances complexity and computational efficiency, making it well-suited for processing and analyzing EEG data. By leveraging initial convolutional layers to capture spatial-temporal features, depthwise separable convolutions for efficient feature extraction, and robust regularization techniques, it achieves a high degree of performance in EEG signal classification tasks.
 
 &nbsp;
-![](visuals/eegnetv4_graph.png)
 
 ## **Model Training**
 
 ### **Cross-Validation Approach**
 
-The model is trained using StratifiedKFold cross-validation to ensure each fold has a similar class distribution, reducing the risk of overfitting and providing a robust assessment of the model's performance. Specifically, the dataset is split into 5 folds:
-
-- Each fold serves as a validation set once, while the remaining folds are used for training.
-- This helps assess the model's performance across different subsets of data.
+The model is trained using **StratifiedKFold cross-validation** to ensure each fold has a similar class distribution, reducing the risk of overfitting and providing a robust assessment of the model's performance. Specifically, the dataset is split into **5 folds**:
 
 ### **Model Implementation**
 
-The implementation of EEGNet v4 model is from braindecode.
+The implementation of **EEGNet v4** model is from braindecode.
 
 ### **Training Process**
 
-**Data Preparation**:
+The training process involves initializing the model weights using **Glorot uniform initialization** and biases set to zero. For each fold in the cross-validation, the model is trained for **400 epochs** using the **Adam optimizer** and **cross-entropy loss** with a **learning rate of 0.005** and **batch size of 2048**. After training each fold, the model's performance is evaluated on the validation set, and metrics such as **accuracy**, **sensitivity**, **specificity**, **PPV**, and **NPV** are calculated using **confusion matrices**. The trained models for each fold are saved to disk for later use and comparison. Finally, the models are evaluated on a separate test set to assess their generalization performance.
 
-- EEG data is preprocessed, filtered, and segmented into epochs.
-- The preprocessed data is loaded and split into training and testing sets based on the cross-validation indices.
+1. **Initialize Model**:
 
-**Model Initialization**:
+   - Use **Glorot uniform initialization** for weights.
+   - Set biases to zero.
+   - EEGNet v4
+     - Number of channels: **64**
+     - Number of output classes: **5**
+     - Kernel length: **32**
 
-- An instance of EEGNet v4 is created with parameters such as the number of **channels (64)**, the **number of output classes (5)**, and the **kernel length (32)**.
-- The model weights are initialized using the **Glorot uniform initialization**, and biases are set to zero.
+2. **Training Configuration**:
 
-**Training Loop**:
+   - Optimizer: **Adam**
+   - Loss Function: **Cross-entropy loss**
+   - Learning Rate: **0.005**
+   - Batch Size: **2048**
+   - Epochs: **400**
 
-- For each fold, the model is trained for **200 epochs** using the **Adam optimizer** and **cross-entropy loss**.
-- The training process involves iterating over mini-batches of the training data, computing the loss, performing backpropagation, and updating the model weights.
+3. **Cross-Validation**:
 
-**Evaluation**:
+   - **Stratified K-Fold Cross-Validation** to ensure each fold has the same proportion of each class.
+   - Number of Folds: **5**
 
-- After training each fold, the model's performance is evaluated on the validation set.
-- Metrics such as accuracy, sensitivity, specificity, PPV, and NPV are calculated using confusion matrices.
+4. **Performance Metrics**:
 
-**Model Saving**:
+   - **Accuracy**
+   - **Sensitivity**
+   - **Specificity**
+   - **PPV** (Positive Predictive Value)
+   - **NPV** (Negative Predictive Value)
+   - **Confusion Matrices**
 
-- The trained models for each fold are saved to disk for later use and comparison.
+5. **Save Models**:
+
+   - Save the trained models for each fold to disk
+
+6. **Evaluate on Test Set**:
+
+   - Assess the generalization performance of the models on a separate test set.
 
 ### **Testing**
 
@@ -95,59 +190,143 @@ After training with cross-validation, the models are evaluated on a separate tes
 
 This approach ensures a comprehensive evaluation of the EEGNet v4 model across different data splits, highlighting areas for improvement and providing a reliable measure of its classification capabilities.
 
-
 # **RESULTS**
 
-**Raw CMs**:
-![Confusion Matrix](visuals/cms.png)
+|    ![](visuals/loss.png)     |
+| :--------------------------: |
+| _Figure 2_ - _Loss per Fold_ |
 
-**Normalized CMs**:
-![Confusion Matrix](visuals/cms_norm.png)
+|             ![](visuals/cms.png)              |
+| :-------------------------------------------: |
+| _Figure 3_ - _Confusion Matrix for each fold_ |
 
-![](visuals/acc.png)
-![](visuals/sens.png)
-![](visuals/spec.png)
-![](visuals/ppv.png)
-![](visuals/npv.png)
+|                         ![](visuals/cms_norm.png)                          |
+| :------------------------------------------------------------------------: |
+| _Figure 4_ - _Predicted(Column) Normalized Confusion Matrix for each fold_ |
+
+|    ![](visuals/acc_sens_spec_ppv_npv.png)     |
+| :-------------------------------------------: |
+| _Figure 5_ - _Bar Charts for various metrics_ |
+
+&nbsp;
+
+| Accuracy   |  Fold 1 |  Fold 2 |  Fold 3 |  Fold 4 |  Fold 5 |
+| :--------- | ------: | ------: | ------: | ------: | ------: |
+| Rest       | 70.2117 | 71.1258 |   64.43 |  72.815 | 67.0572 |
+| Left fist  | 71.3578 | 69.0563 | 61.9724 | 68.4753 | 69.1822 |
+| Both fists |  71.176 | 69.2196 | 66.7982 | 70.8153 | 64.9463 |
+| Right fist | 72.3414 | 70.1401 | 61.4416 | 72.4765 | 66.6404 |
+| Both feet  | 72.1773 |  70.421 | 63.1583 | 68.9371 | 66.6712 |
+
+| Sensitivity |  Fold 1 |  Fold 2 |  Fold 3 |  Fold 4 |  Fold 5 |
+| :---------- | ------: | ------: | ------: | ------: | ------: |
+| Rest        |  50.818 |  52.741 | 41.3026 | 65.5598 |  43.128 |
+| Left fist   | 56.2372 |  52.552 | 31.6124 | 52.8463 | 51.2638 |
+| Both fists  | 54.6012 | 46.9754 | 55.5203 |  56.167 |   35.94 |
+| Right fist  |  56.544 | 52.1739 |  32.089 | 63.5674 | 45.2607 |
+| Both feet   | 56.2372 | 54.8204 | 34.9484 | 50.8539 |  49.921 |
+
+| Specificity |  Fold 1 |  Fold 2 |  Fold 3 |  Fold 4 |  Fold 5 |
+| :---------- | ------: | ------: | ------: | ------: | ------: |
+| Rest        | 89.6053 | 89.5106 | 87.5574 | 80.0702 | 90.9864 |
+| Left fist   | 86.4783 | 85.5607 | 92.3324 | 84.1044 | 87.1005 |
+| Both fists  | 87.7507 | 91.4637 | 78.0762 | 85.4637 | 93.9526 |
+| Right fist  | 88.1389 | 88.1062 | 90.7943 | 81.3857 | 88.0202 |
+| Both feet   | 88.1173 | 86.0215 | 91.3682 | 87.0204 | 83.4215 |
+
+| PPV        |  Fold 1 |  Fold 2 |  Fold 3 |  Fold 4 |  Fold 5 |
+| :--------- | ------: | ------: | ------: | ------: | ------: |
+| Rest       | 50.7661 |  53.861 | 48.9642 | 43.1875 |  58.209 |
+| Left fist  |  46.729 |  45.799 | 54.3716 | 43.4477 | 53.6364 |
+| Both fists | 48.4573 | 56.0948 | 42.2612 | 47.1713 | 63.3705 |
+| Right fist |  50.136 |  50.457 | 50.1863 |  44.108 | 52.3766 |
+| Both feet  | 49.9546 | 47.6582 | 53.9216 | 47.5177 |  46.711 |
+
+| NPV        |  Fold 1 |  Fold 2 |  Fold 3 |  Fold 4 |  Fold 5 |
+| :--------- | ------: | ------: | ------: | ------: | ------: |
+| Rest       | 89.6247 | 89.0806 | 83.7689 | 90.9589 | 84.6055 |
+| Left fist  |  90.356 | 88.5935 | 82.3674 | 88.5299 | 85.9932 |
+| Both fists | 90.1618 |  88.137 | 85.8622 | 89.4037 | 83.4388 |
+| Right fist | 90.5807 | 88.8078 | 82.2245 |  90.625 | 84.6715 |
+| Both feet  | 90.5184 | 89.1314 | 82.9339 | 88.4555 | 85.1244 |
 
 # **DISCUSSION**
 
-## **Discussion of Results**
+**Fold 1**
 
-The model's performance is inconsistent across different folds, particularly for the "Both fists" class. 
+- A significant number of "Rest" instances are misclassified as "Right fist," indicating a challenge in distinguishing these two classes.
 
-Here is a summary of the observations from each fold:
+- Many instances of "Both fists" are misclassified into other categories, suggesting difficulty in accurately identifying this class.
 
-**Fold 1:**
-- Significant confusion between the "Rest" and "Right fist" classes.
-- High number of false negatives in the "Both fists" class.
+- The model struggles particularly with distinguishing "Both fists" from other classes.
 
-**Fold 2:**
-- High misclassification between the "Rest" and other classes.
-- Considerable number of misclassifications in the "Both fists" and "Both feet" classes.
+**Fold 2**
 
-**Fold 3:**
-- Extremely high misclassification rate for the "Both fists" class.
-- Struggles to distinguish between the "Rest" and other classes.
+- The "Rest" class has a notable number of misclassifications into other classes, indicating less clarity in identifying resting state signals.
 
-**Fold 4:**
-- High confusion between the "Rest" and "Left fist" classes.
-- Significant number of misclassifications in the "Both fists" class.
+- The "Both fists" and "Both feet" classes show significant misclassifications, which affects the model's overall accuracy and precision for these classes.
 
-**Fold 5:**
-- Better performance compared to other folds with lower misclassification rates.
-- Some confusion remains between the "Rest" and "Both feet" classes.
+- There is a need for improvement in accurately classifying the "Both fists" and "Both feet" classes.
 
-These results suggest that the model's performance is inconsistent across different folds, indicating the need for further investigation and improvement. The misclassifications and confusion between certain classes highlight the challenges in accurately identifying and distinguishing EEG signals.
+**Fold 3**
 
-It is important to note that EEG signals have limitations in measuring subcortical structures and capturing only large chunks of cortical activity. This limitation may cause some signals to cancel each other out, making it challenging to decisively identify and distinguish these signals. Therefore, alternative approaches may be required to improve the accuracy of EEG signal classification for motor or imagined movements.
+- The model shows a high rate of misclassification for the "Both fists" class, significantly affecting performance.
 
-## **Future Work**
+- The "Rest" class is frequently misclassified as other classes, showing the model's difficulty in identifying resting state signals.
 
-**Separation of Motor and Imagined Tasks**: One potential avenue for future work is to separate the motor and imagined tasks and analyze their performance independently. This can provide insights into the specific challenges and differences in classifying motor and imagined movements. Another interesting direction for future work is to compare the results of classifying motor, imagined, and combined motor and imagined tasks. This can help identify any differences in performance and provide a better understanding of the capabilities and limitations of the model in different scenarios.
+- This fold demonstrates significant challenges in distinguishing between "Rest" and other movements, with "Both fists" being particularly problematic.
 
+**Fold 4**
 
-``` python
+- There is a notable confusion between the "Rest" and "Left fist" classes, which affects accuracy.
+
+- The "Both fists" class continues to be problematic with many misclassifications.
+
+- Similar issues as other folds with additional confusion between "Rest" and "Left fist" classes.
+
+**Fold 5**
+
+- Compared to other folds, fold 5 shows lower misclassification rates, indicating better performance.
+
+- Despite better overall performance, there is still some confusion between the "Rest" and "Both feet" classes.
+
+- Fold 5 performs comparatively better but still faces challenges in distinguishing certain classes.
+
+**Common challenges observed:**
+
+- Frequent misclassifications suggest that the model struggles to identify the resting state accurately.
+
+- High misclassification rates for the "Both fists" class are observed across most folds.
+
+- The model shows variability in performance across folds, indicating a need for more robust training and validation processes.
+
+One potential avenue for future work is to separate the motor and imagined tasks and analyze their performance independently. This can provide insights into the specific challenges and differences in classifying motor and imagined movements. Another interesting direction for future work is to compare the results of classifying motor, imagined, and combined motor and imagined tasks. This can help identify any differences in performance and provide a better understanding of the capabilities and limitations of the model in different scenarios.
+
+# **REFERENCES**
+
+###### <a id="1"></a> <sup>[1]</sup> Velasco, Ivan & Sipols, A. & Simon, Clara & Pastor, Luis & Bayona, Sofia. (2023). Motor imagery EEG signal classification with a multivariate time series approach. BioMedical Engineering OnLine. 22. https://doi.org/10.1186/s12938-023-01079-x.
+
+###### <a id="2"></a> <sup>[2]</sup> Batistić, Luka, Diego Sušanj, Domagoj Pinčić, and Sandi Ljubic. 2023. "Motor Imagery Classification Based on EEG Sensing with Visual and Vibrotactile Guidance" Sensors 23, no. 11: 5064. https://doi.org/10.3390/s23115064
+
+###### <a id="3"></a> <sup>[3]</sup> Alizadeh, Nazanin & Afrakhteh, Sajjad & Mosavi, M.. (2023). Deep CNN‐based classification of motor imagery tasks from EEG signals using 2D wavelet transformed images of adaptively reconstructed signals from MVMD decomposed modes. International Journal of Imaging Systems and Technology. 33. https://doi.org/10.1002/ima.22913.
+
+###### <a id="4"></a> <sup>[4]</sup> Lee, Y., Lee, H. J., & Tae, K. S. (2023). Classification of EEG signals related to real and imagery knee movements using deep learning for brain computer interfaces. Technology and health care : official journal of the European Society for Engineering and Medicine, 31(3), 933–942. https://doi.org/10.3233/THC-220363
+
+###### <a id="5"></a> <sup>[5]</sup> T. Pham, K. Adhikari and W. G. Besio, "Deep Learning-Based Classification of Finger Movements using tEEG and EEG Signals," 2023 IEEE World AI IoT Congress (AIIoT), Seattle, WA, USA, 2023, pp. 0120-0126, doi: https://doi.org/10.1109/AIIoT58121.2023.10174357.
+
+###### <a id="6"></a> <sup>[6]</sup> Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220.
+
+###### <a id="7"></a> <sup>[7]</sup> Schalk, G., McFarland, D.J., Hinterberger, T., Birbaumer, N., Wolpaw, J.R. BCI2000: A General-Purpose Brain-Computer Interface (BCI) System. IEEE Transactions on Biomedical Engineering 51(6):1034-1043, 2004.
+
+###### <a id="8"></a> <sup>[8]</sup> Schalk, G., McFarland, D.J., Hinterberger, T., Birbaumer, N., Wolpaw, J.R. BCI2000: A General-Purpose Brain-Computer Interface (BCI) System. IEEE Transactions on Biomedical Engineering 51(6):1034-1043, 2004.
+
+###### <a id="9"></a> <sup>[9]</sup> G. Amrani, A. Adadi, M. Berrada, Z. Souirti and S. Boujraf, "EEG signal analysis using deep learning: A systematic literature review," 2021 Fifth International Conference On Intelligent Computing in Data Sciences (ICDS), Fez, Morocco, 2021, pp. 1-8, doi: 10.1109/ICDS53782.2021.9626707. keywords: {Deep learning;Systematics;Computational modeling;Bibliographies;Computer architecture;Brain modeling;Electroencephalography;Deep learning;Electroencephalography;EEG;Machine Learning;Systematic Literature Review},
+
+# APPENDIX
+
+![](visuals/eegnetv4_graph.png)
+
+```python
 # preprocess.py
 
 import os
@@ -190,7 +369,7 @@ def process_run(edf_path, run_index, tmin=0, tmax=4.1):
     raw = mne.io.read_raw_edf(edf_path, preload=True)
     raw.notch_filter(freqs=60.0)  # powerline notch filter
     raw.filter(2, None, method='iir')  # High-pass filter at 2 Hz
-    
+
     # Define event annotations
     events, event_id = mne.events_from_annotations(raw)
     labels = []
@@ -229,10 +408,10 @@ def process_run(edf_path, run_index, tmin=0, tmax=4.1):
             else:
                 labels.append(event_id_mapping['T0'])
             print(labels)
-        
+
         if epochs_data.shape[0] > 0:  # Only append if there are valid epochs
             epochs_data_list.append(epochs_data)
-    
+
     return epochs_data_list, labels, task_label
 
 def pad_or_trim(data, target_length):
@@ -241,7 +420,7 @@ def pad_or_trim(data, target_length):
             pad_width = target_length - array.shape[2]
             return np.pad(array, ((0, 0), (0, 0), (0, pad_width)), mode='constant')
         return array[:, :, :target_length]
-    
+
     return np.concatenate([pad(d) for d in data], axis=0)
 
 def save_data(data_dir, tmin=0, tmax=4.1):
@@ -252,18 +431,18 @@ def save_data(data_dir, tmin=0, tmax=4.1):
     for subject in subjects:
         subject_dir = os.path.join(data_dir, subject)
         edf_files = [f for f in os.listdir(subject_dir) if f.endswith('.edf')]
-        
+
         for edf_file in edf_files:
             edf_path = os.path.join(subject_dir, edf_file)
             run_index = int(edf_file.split('R')[1].split('.')[0])  # Extract run index from filename
             epochs_data_list, labels, task_label = process_run(edf_path, run_index, tmin, tmax)
-            
+
             if len(labels) > 0 and epochs_data_list:  # Only process if there are labels and epochs
                 if task_label in ['baseline_open', 'baseline_closed']:
                     padded_data = pad_or_trim(epochs_data_list, baseline_samples)
                 else:
                     padded_data = pad_or_trim(epochs_data_list, max_samples)
-                
+
                 labels = np.array(labels)
 
                 # Create the save directory
@@ -283,14 +462,14 @@ print("All preprocessed data saved.")
 
 ```
 
-``` python
+```python
 # -*- coding: utf-8 -*-
-"""iter_2.ipynb
+"""iter_3.ipynb
 
 Automatically generated by Colab.
 
 Original file is located at
-    https://colab.research.google.com/drive/1DasOYyrXmeAUCnT8sByn696Fb839nQ9q
+    https://colab.research.google.com/drive/1AGGrjq0ox8C4qWjQE8mAKLnu1PLTkr7u
 """
 
 from google.colab import drive
@@ -334,6 +513,8 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_s
 from einops.layers.torch import Rearrange
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import matplotlib as mpl
 import os
 import concurrent.futures
 import logging
@@ -736,7 +917,6 @@ try:
 except RuntimeError as e:
     print(f"Error during data transfer to CUDA: {e}")
 
-
 def process_fold(train_index, test_index, X_combined, y_combined, batch_size=128):
     print("process_fold called")
     assert torch.cuda.is_available(), "CUDA is not available. Check your GPU setup."
@@ -776,13 +956,15 @@ def process_fold(train_index, test_index, X_combined, y_combined, batch_size=128
 
     # Define the loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.05, capturable=False)  # capturable=False to avoid CUDA assertion
+    optimizer = optim.Adam(model.parameters(), lr=0.005, capturable=False)  # capturable=False to avoid CUDA assertion
 
     # Training loop
-    def train_model(model, criterion, optimizer, X_train, y_train, n_epochs=200, batch_size=128):
+    def train_model(model, criterion, optimizer, X_train, y_train, n_epochs=400, batch_size=128):
         model.train()
         dataset = torch.utils.data.TensorDataset(X_train, y_train)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+        loss_history = []
 
         for epoch in range(n_epochs):
             epoch_start_time = time.time()
@@ -803,12 +985,15 @@ def process_fold(train_index, test_index, X_combined, y_combined, batch_size=128
                 print(f'Batch {batch_idx + 1}/{len(dataloader)} processed in {batch_end_time - batch_start_time:.4f} seconds')
 
             avg_loss = running_loss / len(dataloader)
+            loss_history.append(avg_loss)
             epoch_end_time = time.time()
             logger.info(f'Epoch [{epoch + 1}/{n_epochs}] completed in {epoch_end_time - epoch_start_time:.4f} seconds, Average Loss: {avg_loss:.4f}')
 
+        return model, loss_history
+
     logger.info('Starting model training...')
     print('Starting model training...')
-    train_model(model, criterion, optimizer, X_train, y_train, batch_size=batch_size)
+    model, loss_history = train_model(model, criterion, optimizer, X_train, y_train, batch_size=batch_size)
     logger.info('Model training completed.')
     print('Model training completed.')
 
@@ -861,7 +1046,7 @@ def process_fold(train_index, test_index, X_combined, y_combined, batch_size=128
     logger.info(f'Fold NPVs: {fold_npvs}')
     print(f'Fold NPVs: {fold_npvs}')
 
-    return model, fold_sensitivities, fold_specificities, fold_ppvs, fold_npvs, cm
+    return model, fold_sensitivities, fold_specificities, fold_ppvs, fold_npvs, cm, loss_history
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 all_sensitivities = []
@@ -870,6 +1055,7 @@ all_ppvs = []
 all_npvs = []
 models = []
 cms = []
+loss_histories = []
 
 # Check if the trained_models directory exists and create if it doesn't
 os.makedirs(os.path.join(base_dir, 'trained_models'), exist_ok=True)
@@ -892,7 +1078,7 @@ else:
 
     for train_index, test_index in skf.split(X_combined, y_combined):
         print(f"Processing fold {fold_index}")
-        model, sensitivities, specificities, ppvs, npvs, cm = process_fold(train_index, test_index, X_combined, y_combined, batch_size=2048)
+        model, sensitivities, specificities, ppvs, npvs, cm, loss_history = process_fold(train_index, test_index, X_combined, y_combined, batch_size=2048)
         if sensitivities and specificities and ppvs and npvs:
             all_sensitivities.append(sensitivities)
             all_specificities.append(specificities)
@@ -900,6 +1086,7 @@ else:
             all_npvs.append(npvs)
         models.append(model)
         cms.append(cm)
+        loss_histories.append(loss_history)
         model_save_path = os.path.join(base_dir, 'trained_models', f'model_fold_{fold_index}.pth')
         torch.save(model.state_dict(), model_save_path)
         print(f"Completed fold {fold_index}")
@@ -918,8 +1105,18 @@ print(f'Mean Specificities per fold: {all_specificities.mean(axis=0)}')
 print(f'Mean PPVs per fold: {all_ppvs.mean(axis=0)}')
 print(f'Mean NPVs per fold: {all_npvs.mean(axis=0)}')
 
-# Assuming you have these variables defined
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# Plot loss graphs fold by fold
+def plot_loss_graphs(loss_histories):
+    fig, ax = plt.subplots()
+    for fold, loss_history in enumerate(loss_histories, start=1):
+        ax.plot(loss_history, label=f'Fold {fold}')
+    ax.set_xlabel('Epochs')
+    ax.set_ylabel('Loss')
+    ax.set_title('Training Loss per Fold')
+    ax.legend()
+    plt.show()
+
+plot_loss_graphs(loss_histories)
 
 # Test the resulting models with y_combined_test and X_combined_test
 X_combined_test_tensor = torch.from_numpy(X_combined_test).float().to(device)
@@ -1019,7 +1216,6 @@ df_npvs = pd.DataFrame(all_test_npvs * 100, index=class_names, columns=[f'Fold {
 df_accuracies = pd.DataFrame(all_test_accuracies * 100, index=class_names, columns=[f'Fold {i+1}' for i in range(all_test_accuracies.shape[1])])
 
 
-
 # Print the tables
 print("Test Sensitivities by Fold")
 print(df_sensitivities)
@@ -1032,23 +1228,40 @@ print(df_npvs)
 print("\nTest Accuracies by Fold")
 print(df_accuracies)
 
-def display_table(df, title):
-    df_formatted = df.round(2).astype(str) + '%'
-    fig, ax = plt.subplots(figsize=(10, len(df) * 0.5 + 1))  # Adjust the size as needed
-    ax.axis('tight')
-    ax.axis('off')
-    table = ax.table(cellText=df_formatted.values, colLabels=df_formatted.columns, rowLabels=df_formatted.index, cellLoc='center', loc='center')
-    ax.set_title(title)
+# List of DataFrames and their corresponding titles
+dataframes = [
+    (df_accuracies, 'Test Accuracies by Fold'),
+    (df_sensitivities, 'Test Sensitivities by Fold'),
+    (df_specificities, 'Test Specificities by Fold'),
+    (df_ppvs, 'Test PPVs by Fold'),
+    (df_npvs, 'Test NPVs by Fold')
+]
+
+# Define the function to display bar charts in a custom grid
+def display_combined_bar_charts(dataframes):
+    fig = plt.figure(figsize=(20, 12))
+    spec = gridspec.GridSpec(ncols=6, nrows=2, figure=fig)
+
+    axes = []
+    axes.append(fig.add_subplot(spec[0, 0:2]))  # row 0, spans columns 0-1
+    axes.append(fig.add_subplot(spec[0, 2:4]))  # row 0, spans columns 2-3
+    axes.append(fig.add_subplot(spec[0, 4:]))   # row 0, spans columns 4-5
+    axes.append(fig.add_subplot(spec[1, 1:3]))  # row 1, spans columns 1-2
+    axes.append(fig.add_subplot(spec[1, 3:5]))  # row 1, spans columns 3-4
+
+    for ax, (df, title) in zip(axes, dataframes):
+        df.plot(kind='bar', ax=ax)
+        ax.set_title(title)
+        ax.set_xlabel('Fold')
+        ax.set_ylabel('Percentage')
+        ax.legend(title='Metrics', bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax.set_xticklabels(df.index, rotation=0)
+
+    plt.tight_layout()
     plt.show()
 
-# Display each DataFrame as an image
-display_table(df_sensitivities, 'Test Sensitivities by Fold')
-display_table(df_specificities, 'Test Specificities by Fold')
-display_table(df_ppvs, 'Test PPVs by Fold')
-display_table(df_npvs, 'Test NPVs by Fold')
-display_table(df_accuracies, 'Test Accuracies by Fold')
+display_combined_bar_charts(dataframes)
 
-# Convert confusion matrices to numpy arrays if they are not already
 df_cms = [np.array(cm) for cm in df_cms]
 
 # Normalize the confusion matrices along the columns
@@ -1059,7 +1272,6 @@ class_names = ['Rest', 'Left fist', 'Both fists', 'Right fist', 'Both feet']
 
 # Create a figure with subplots for each fold, adjusting layout and size
 fig, axes = plt.subplots(1, len(df_cms_normalized), figsize=(20, 8), constrained_layout=True)
-
 # Plot each normalized confusion matrix
 for i, df_cm in enumerate(df_cms_normalized, 1):
     sns.heatmap(df_cm, annot=True, fmt='.2f', cmap='Blues', ax=axes[i-1], xticklabels=class_names, yticklabels=class_names)
